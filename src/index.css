@@ -2,39 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* IPL Cricket-themed Design System */
 
 @layer base {
   :root {
+    /* Cricket Green Theme */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 120 100% 8%;
+    
+    /* Cricket Field Colors */
+    --primary: 120 100% 15%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 120 80% 25%;
+    
+    /* Cricket Orange Energy */
+    --secondary: 32 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 32 100% 65%;
+    
+    /* Professional Blue */
+    --accent: 212 100% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 212 80% 60%;
+    
+    /* Stadium Colors */
+    --muted: 120 20% 96%;
+    --muted-foreground: 120 20% 40%;
+    
+    /* Card Colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 120 100% 8%;
+    
+    /* Interactive Elements */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    --popover-foreground: 120 100% 8%;
+    --border: 120 30% 88%;
+    --input: 120 30% 95%;
+    --ring: 120 100% 15%;
+    
+    /* Status Colors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    
+    /* Cricket Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
+    --gradient-stadium: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-field: linear-gradient(45deg, hsl(120 60% 25%), hsl(120 80% 20%));
+    
+    /* Cricket Shadows */
+    --shadow-cricket: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+    --shadow-stadium: 0 20px 60px -20px hsl(var(--primary) / 0.2);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.5rem;
 
@@ -101,5 +124,79 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Cricket Button Variants */
+  .btn-cricket {
+    @apply bg-gradient-to-r from-primary to-primary-glow text-primary-foreground;
+    @apply shadow-cricket hover:shadow-glow transform hover:scale-105;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .btn-stadium {
+    @apply bg-gradient-to-r from-secondary to-secondary-glow text-secondary-foreground;
+    @apply shadow-lg hover:shadow-xl transform hover:scale-105;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  /* Cricket Cards */
+  .card-stadium {
+    @apply bg-card border border-border rounded-xl shadow-stadium;
+    @apply hover:shadow-glow transform hover:-translate-y-1;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  /* Prediction Display */
+  .prediction-display {
+    @apply bg-gradient-to-br from-primary/10 to-accent/10;
+    @apply border-2 border-primary/20 rounded-2xl p-6;
+    @apply shadow-cricket animate-pulse;
+  }
+  
+  /* Team Selection */
+  .team-selector {
+    @apply bg-muted/50 border-2 border-border rounded-xl p-4;
+    @apply hover:border-primary/50 hover:bg-primary/5;
+    @apply transition-all duration-200 ease-out cursor-pointer;
+  }
+  
+  .team-selector.selected {
+    @apply border-primary bg-primary/10 shadow-cricket;
+  }
+  
+  /* Stadium Animation */
+  .stadium-glow {
+    @apply relative overflow-hidden;
+  }
+  
+  .stadium-glow::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent;
+    @apply transform -translate-x-full animate-pulse;
+  }
+  
+  /* Match Stats */
+  .stat-card {
+    @apply bg-gradient-to-br from-accent/10 to-secondary/10;
+    @apply rounded-lg p-4 border border-border/50;
+    @apply hover:shadow-lg transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  /* Custom Cricket Shadows */
+  .shadow-cricket {
+    box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+  }
+  
+  .shadow-stadium {
+    box-shadow: 0 20px 60px -20px hsl(var(--primary) / 0.2);
   }
 }
