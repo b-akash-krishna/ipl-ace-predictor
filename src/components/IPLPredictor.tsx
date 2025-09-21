@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Target, TrendingUp, Users, Loader2 } from "lucide-react";
+import { Trophy, Loader2 } from "lucide-react";
 import heroImage from "@/assets/cricket-stadium-hero.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 interface MatchPrediction {
   predictedScore: number;
@@ -16,8 +16,8 @@ interface TeamStats {
   name: string;
   matches: number;
   wins: number;
-  winRate: number;
-  avgScore: number;
+  win_rate: number;
+  avg_score: number;
 }
 
 const IPLPredictor = () => {
@@ -29,6 +29,8 @@ const IPLPredictor = () => {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [teams, setTeams] = useState<string[]>([]);
   const [venues, setVenues] = useState<string[]>([]);
+  const [teamStats, setTeamStats] = useState<TeamStats[]>([]);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +48,7 @@ const IPLPredictor = () => {
           .order("name", { ascending: true });
 
         if (teamsError || venuesError) {
-          throw new Error("Failed to fetch data.");
+          throw new Error("Failed to fetch dropdown data.");
         }
 
         const teamsList = teamsData?.map((item) => item.name) || [];
@@ -66,13 +68,34 @@ const IPLPredictor = () => {
       }
     };
 
-    fetchDropdownData();
-  }, [toast]);
+    const fetchTeamStats = async () => {
+      setIsStatsLoading(true);
+      try {
+        const { data: statsData, error: statsError } = await supabase
+          .from("teams")
+          .select("name, matches, wins, win_rate, avg_score")
+          .order("win_rate", { ascending: false });
 
-  const teamStats: TeamStats[] = [
-    { name: "Chennai Super Kings", matches: 236, wins: 133, winRate: 56.36, avgScore: 165 },
-    { name: "Mumbai Indians", matches: 247, wins: 140, winRate: 56.68, avgScore: 168 },
-  ];
+        if (statsError) {
+          throw new Error("Failed to fetch team statistics.");
+        }
+
+        setTeamStats(statsData as TeamStats[]);
+      } catch (error) {
+        toast({
+          title: "Error fetching stats",
+          description: "Could not load team performance statistics. Please try again.",
+          variant: "destructive",
+        });
+        console.error("Fetch error:", error);
+      } finally {
+        setIsStatsLoading(false);
+      }
+    };
+
+    fetchDropdownData();
+    fetchTeamStats();
+  }, [toast]);
 
   const generatePrediction = async () => {
     if (!team1 || !team2 || !venue) {
@@ -142,6 +165,13 @@ const IPLPredictor = () => {
           <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto drop-shadow-md">
             Use our advanced machine learning model to predict the final score of a match.
           </p>
+          <div className="mt-6">
+            <Link to="/data-viz">
+              <Button variant="secondary" className="text-md">
+                View Detailed Match Statistics
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -235,22 +265,28 @@ const IPLPredictor = () => {
               Team Performance Statistics
             </h3>
             <div className="grid gap-4">
-              {teamStats.map((team, index) => (
-                <div key={index} className="stat-card flex justify-between items-center">
-                  <div>
-                    <h4 className="font-semibold">{team.name}</h4>
-                    <p className="text-sm text-muted-foreground">{team.matches} matches played</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-primary">{team.winRate}%</div>
-                    <div className="text-sm text-muted-foreground">Win Rate</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-accent">{team.avgScore}</div>
-                    <div className="text-sm text-muted-foreground">Avg Score</div>
-                  </div>
+              {isStatsLoading ? (
+                <div className="flex justify-center items-center h-48">
+                  <Loader2 className="h-12 w-12 text-primary animate-spin" />
                 </div>
-              ))}
+              ) : (
+                teamStats.map((team, index) => (
+                  <div key={index} className="stat-card flex justify-between items-center">
+                    <div>
+                      <h4 className="font-semibold">{team.name}</h4>
+                      <p className="text-sm text-muted-foreground">{team.matches} matches played</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-primary">{team.win_rate}%</div>
+                      <div className="text-sm text-muted-foreground">Win Rate</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-accent">{Math.round(team.avg_score)}</div>
+                      <div className="text-sm text-muted-foreground">Avg Score</div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </Card>
         </div>
